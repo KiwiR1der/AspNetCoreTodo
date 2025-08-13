@@ -1,0 +1,15 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
+    asp-action 这个 tag helper 会为该表单生成一个 URL，就像你将其应用在一个 <a> 元素上那样。
+        在 <form> 元素里，添加一个 asp- tag helper 的同时会在表单里添加一个隐藏字段，其中包含一个验证标记。
+        该验证标记可用于防止 跨站请求伪造(cross-site request forgery -- CSRF) 攻击。
+*@
+
+@model TodoItem
+
+<form asp-action="AddItem" method="post">
+    <label asp-for="Title">Add a new item:</label>
+    <input asp-for="Title" />
+    <button type="submit">Add</button>
+</form>
