@@ -3,7 +3,6 @@ using AspNetCoreTodo.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 /*
  * 由控制器本身处理的路由叫 action 
@@ -33,7 +32,10 @@ namespace AspNetCoreTodo.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var items = await _todoItemService.GetIncompleteItemAsync();
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();    // 用户信息没找到，用 Challenge() 方法强制用户再次登录：
+
+            var items = await _todoItemService.GetIncompleteItemAsync(currentUser);
 
             var model = new TodoViewModel
             {
@@ -48,10 +50,20 @@ namespace AspNetCoreTodo.Controllers
         {
             if (!ModelState.IsValid)
             {
+                // 记录所有模型错误
+                var errors = ModelState.Values.SelectMany(v => v.Errors);
+                foreach (var error in errors)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+                //return RedirectToAction("Index");
                 return RedirectToAction("Index");
             }
 
-            var successful = await _todoItemService.AddItemAsync(item);
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return RedirectToAction("Index");
+
+            var successful = await _todoItemService.AddItemAsync(item, currentUser);
 
             if (!successful)
             {
@@ -61,6 +73,7 @@ namespace AspNetCoreTodo.Controllers
             return RedirectToAction("Index");
         }
 
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> MarkDone(Guid id)
         {
             if (id == Guid.Empty)
@@ -68,7 +81,10 @@ namespace AspNetCoreTodo.Controllers
                 return RedirectToAction("Index");
             }
 
-            var successful = await _todoItemService.MarkDoneAsync(id);
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return RedirectToAction("Index");
+
+            var successful = await _todoItemService.MarkDoneAsync(id, currentUser);
 
             if (!successful)
             {

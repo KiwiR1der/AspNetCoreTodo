@@ -1,10 +1,11 @@
 ﻿using AspNetCoreTodo.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace AspNetCoreTodo.Services
 {
     public class FakeTodoItemService : ITodoItemService
     {
-        public Task<TodoItem[]> GetIncompleteItemAsync()
+        public Task<TodoItem[]> GetIncompleteItemAsync(IdentityUser user)
         {
             var item1 = new TodoItem
             {
@@ -21,12 +22,12 @@ namespace AspNetCoreTodo.Services
             return Task.FromResult(new[] { item1, item2 });
         }
 
-        Task<bool> ITodoItemService.AddItemAsync(TodoItem newItem)
+        Task<bool> ITodoItemService.AddItemAsync(TodoItem newItem, IdentityUser user)
         {
             throw new NotImplementedException();
         }
 
-        Task<bool> ITodoItemService.MarkDoneAsync(Guid id)
+        Task<bool> ITodoItemService.MarkDoneAsync(Guid id, IdentityUser user)
         {
             throw new NotImplementedException();
         }
